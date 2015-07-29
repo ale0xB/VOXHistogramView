@@ -55,4 +55,9 @@
 */
 @property(nonatomic, strong) UIColor *peaksColor;
 
+/**
+*   Produce flipped image too
+*/
+@property (nonatomic, assign) BOOL produceFlipped;
+
 @end

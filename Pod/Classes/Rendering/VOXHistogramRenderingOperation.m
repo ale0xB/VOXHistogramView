@@ -71,42 +71,44 @@
 
 #pragma mark - Rendering
 
-- (UIImage *)renderedHistogramWithLevels:(NSArray *)levels
+- (UIImage *)rendredHistogramWithLevels:(NSArray *)levels shouldProduceFlippedImage:(BOOL)produceFlipped
 {
     /* Get image size */
     CGSize outputImageSize = self.renderingConfiguration.outputImageSize;
-
+    
+    CGSize imageSize = produceFlipped ? CGSizeMake(self.renderingConfiguration.outputImageSize.width, self.renderingConfiguration.outputImageSize.height / 2.0) : outputImageSize;
+    
     /* Creating image context */
-    UIGraphicsBeginImageContextWithOptions(outputImageSize, NO, [self scale]);
+    UIGraphicsBeginImageContextWithOptions(imageSize, NO, [self scale]);
     CGContextRef context = UIGraphicsGetCurrentContext();
-
+    
     /* Please, no antialiasing */
     CGContextSetShouldAntialias(context, NO);
-
+    
     [levels enumerateObjectsUsingBlock:^(NSNumber *levelNumber, NSUInteger idx, BOOL *stop) {
         /* Check operation is cancelled */
         if ([self isCancelled]) {
             *stop = YES;
             return;
         }
-
+        
         /* Get float from NSNumber */
         CGFloat levelFloat = [levelNumber floatValue];
-
+        
         /* Calculate current peak offset */
         CGFloat peakOffset = idx * ([self onePeakWidth] + [self marginWidth]);
-
+        
         /* Draw every line for peak width */
         for (int i = 0; i < [self linesCountInOnePeak]; i ++) {
-
+            
             /* Calculate current line offset */
             CGFloat lineOffset = peakOffset + i * [self lineMinimumWidth];
-
+            
             /* Get current line color */
             UIColor *lineColor = self.renderingConfiguration.peaksColor;
-
-            CGRect rect = CGRectMake(0.0f, 0.0f, outputImageSize.width, outputImageSize.height);
-
+            
+            CGRect rect = CGRectMake(0.0f, 0.0f, imageSize.width, imageSize.height);
+            
             /* Lets draw */
             [self drawLineInContext:context
                              inRect:rect
@@ -116,22 +118,50 @@
                            andColor:lineColor];
         }
     }];
-
+    
     /* Check operation is cancelled */
     if ([self isCancelled]) {
         /* Context clean up */
         UIGraphicsEndImageContext();
         return nil;
     }
-
+    
     /* Get result image from context */
     UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
-
+    UIGraphicsEndImageContext();
+    
+    if (!produceFlipped) {
+        return [image imageWithRenderingMode:self.renderingConfiguration.renderingMode];
+    }
+    
+    UIImage *flippedImage = [UIImage imageWithCGImage:image.CGImage scale:image.scale orientation:UIImageOrientationDownMirrored];
+    
+    UIGraphicsBeginImageContextWithOptions(CGSizeMake(outputImageSize.width, outputImageSize.height), NO, [self scale]);
+    [image drawAtPoint:CGPointMake(0, 0)];
+    
+    [flippedImage drawAtPoint:CGPointMake(0, outputImageSize.height / 2.0f)];
+    
+    /* Check again */
+    if ([self isCancelled]) {
+        /* Context clean up */
+        UIGraphicsEndImageContext();
+        return nil;
+    }
+    
+    UIImage *finalImage = UIGraphicsGetImageFromCurrentImageContext();
+    
+    
     /* Context clean up */
     UIGraphicsEndImageContext();
-
+    
+    
     /* Return image in current rendering mode */
-    return [image imageWithRenderingMode:self.renderingConfiguration.renderingMode];
+    return [finalImage imageWithRenderingMode:self.renderingConfiguration.renderingMode];
+}
+
+- (UIImage *)renderedHistogramWithLevels:(NSArray *)levels
+{
+    return [self rendredHistogramWithLevels:levels shouldProduceFlippedImage:self.renderingConfiguration.produceFlipped];
 }
 
 - (void)drawLineInContext:(CGContextRef)context
