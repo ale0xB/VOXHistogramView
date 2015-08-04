@@ -372,6 +372,7 @@ static NSUInteger const VOXHistogramControlViewDefaultMarginWidth = 1;
     renderingConfiguration.peaksColor = [UIColor whiteColor];
     renderingConfiguration.peakWidth = self.peakWidth;
     renderingConfiguration.marginWidth = self.marginWidth;
+    renderingConfiguration.produceFlipped = YES;
 
     /* Calculate number of levels that histogram can display in current bounds */
     NSUInteger samplingRate = [self _samplingRateForHistogramWidth:CGRectGetWidth(self.histogramView.bounds)
