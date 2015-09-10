@@ -71,7 +71,7 @@
 
 #pragma mark - Rendering
 
-- (UIImage *)rendredHistogramWithLevels:(NSArray *)levels shouldProduceFlippedImage:(BOOL)produceFlipped
+- (UIImage *)renderedHistogramWithLevels:(NSArray *)levels shouldProduceFlippedImage:(BOOL)produceFlipped
 {
     /* Get image size */
     CGSize outputImageSize = self.renderingConfiguration.outputImageSize;
@@ -161,7 +161,7 @@
 
 - (UIImage *)renderedHistogramWithLevels:(NSArray *)levels
 {
-    return [self rendredHistogramWithLevels:levels shouldProduceFlippedImage:self.renderingConfiguration.produceFlipped];
+    return [self renderedHistogramWithLevels:levels shouldProduceFlippedImage:self.renderingConfiguration.produceFlipped];
 }
 
 - (void)drawLineInContext:(CGContextRef)context
@@ -200,7 +200,7 @@
 
 - (CGFloat)lineMinimumWidth
 {
-    return 1 / [self scale];
+    return self.renderingConfiguration.usePixelMeasure ? 1 : 1 / [self scale];
 }
 
 - (CGFloat)onePeakWidth

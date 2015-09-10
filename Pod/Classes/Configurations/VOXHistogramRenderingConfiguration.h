@@ -60,4 +60,9 @@
 */
 @property (nonatomic, assign) BOOL produceFlipped;
 
+/**
+ *   Independent pixel values (not adapting to display's pixel density)
+ */
+@property (nonatomic, assign) BOOL usePixelMeasure;
+
 @end
